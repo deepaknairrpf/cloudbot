@@ -1,0 +1,62 @@
+version: "3.8"
+
+networks:
+  cloud-bot:
+    driver: bridge
+    external:
+      name: cloud-bot
+
+services:
+  zipkin:
+    image: openzipkin/zipkin:latest
+    container_name: zipkin
+    ports:
+      - "9411:9411"
+
+    networks:
+      - cloud-bot
+
+
+
+  service1:
+    build:
+      context: services/1
+    container_name: service1
+    ports:
+      - "5001:5000"
+    env_file:
+      - docker-service.env
+    environment:
+      - SERVICE_NAME=service1
+    volumes:
+      - './services/1:/app'
+    networks:
+      - cloud-bot
+
+  service2:
+    build:
+      context: services/2
+    container_name: service2
+    env_file:
+      - docker-service.env
+    environment:
+      - SERVICE_NAME=service2
+    volumes:
+      - './services/2:/app'
+
+    networks:
+      - cloud-bot
+
+  service3:
+    build:
+      context: services/3
+    container_name: service3
+    env_file:
+      - docker-service.env
+    environment:
+      - SERVICE_NAME=service3
+    volumes:
+      - './services/3:/app'
+
+    networks:
+      - cloud-bot
