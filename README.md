@@ -115,9 +115,13 @@ A specific trace that raised an intentional exception.
 
 
 ## Setup
-* Start Prometheus, Grafana with cadvisor exporter by running the below command inside `prometheus` directory  
-``docker-compose up``
+* Create docker network called cloud-bot  
+``docker network create cloud-bot``
 
-* Start demo app with Zipkin tracing enabled using the below command  
-``docker-compose up --build``
+* Spawn containers needed to run Prometheus (from `prometheus` dir)  
+``docker-compose -f prometheus-docker-compose.yml``
+
+* Spawn containers needed to run Zipkin (from `cloudbot` dir)
+``docker-compose -f zipkin-docker-compose.yml``  
+
 
