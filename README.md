@@ -128,11 +128,11 @@ A specific trace that raised an intentional exception.
 ## Rasa Bot Setup
 Install the requirements from the requirements.txt file.
 
-### To Test the Model in shell
+### To Test the Bot in shell
 cd rasa_bot
 rasa shell --model models/cloud_bot_model.tar.gz
 
-### To train the model 
+### To retrain the Bot 
 cd rasa_bot
 rasa train --fixed-model-name cloud_bot_model
 
