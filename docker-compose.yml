@@ -1,0 +1,12 @@
+version: '3'
+services:
+  rasa_bot:
+    build: .
+    command: ["python", "-m", "rasa_sdk", "--actions", "rasa_bot.actions"]
+    working_dir: "/app/"
+    environment:
+      - PYTHONPATH=/app/
+    entrypoint: "/app/rasa_bot_entrypoint.sh"
+    ports:
+      - "5005:5005"
+      - "5055:5055"

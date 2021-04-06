@@ -125,3 +125,18 @@ A specific trace that raised an intentional exception.
 ``docker-compose -f zipkin-docker-compose.yml``  
 
 
+## Rasa Bot Setup
+Install the requirements from the requirements.txt file.
+
+### To Test the Model in shell
+cd rasa_bot
+rasa shell --model models/cloud_bot_model.tar.gz
+
+### To train the model 
+cd rasa_bot
+rasa train --fixed-model-name cloud_bot_model
+
+For detailed steps, refer to https://rasa.com/docs/rasa/installation/
+
+### To start the rasa server in the docker container
+docker-compose -f docker-compose.yml up

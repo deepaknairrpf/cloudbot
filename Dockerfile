@@ -13,5 +13,8 @@ WORKDIR /app
 RUN pip install -r requirements.txt
 COPY . .
 RUN chmod +x entrypoint.sh
+RUN chmod +x ./rasa_bot_entrypoint.sh
+RUN chown 1001:1001 /app/rasa_bot/models/cloud_bot_model.tar.gz
+
 
 ENTRYPOINT ["/app/entrypoint.sh"]
