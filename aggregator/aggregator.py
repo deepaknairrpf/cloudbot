@@ -64,15 +64,20 @@ try:
             duration = trace_info['duration']
             start_timestamp = trace_info['timestamp']
             span_kind = trace_info['kind']
+
             tags = trace_info.get('tags', {})
-            status = SUCCESS if "error" not in tags else FAILURE
+            service_endpoint_metadata = trace_info.info('localEndpoint', {})
+
+            metadata = dict(tags, **service_endpoint_metadata)
+
+            status = SUCCESS if "error" not in metadata else FAILURE
 
             span_latency = SpanLatency(
                 span_name=span_name,
                 span_kind=span_kind,
                 start_timestamp=start_timestamp,
                 duration=duration,
-                tags=tags,
+                metadata=metadata,
                 status=status,
                 trace_id=trace_id,
                 parent_id=parent_id,
