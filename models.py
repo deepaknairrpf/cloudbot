@@ -33,7 +33,7 @@ class SpanLatency(Document):
     span_id = StringField(max_length=16, min_length=16, required=True, unique_with=['trace_id', 'span_kind'])
 
 
-class CPULoad(Document):
+class CpuLoad(Document):
     service_name = StringField(required=True)
     timestamp = LongField(required=True)
     cpu_load = FloatField(required=True)

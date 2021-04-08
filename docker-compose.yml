@@ -29,6 +29,9 @@ services:
     container_name: ofelia_worker
     command: [ "sleep", "infinity" ]
 
+    networks:
+      - cloud-bot
+
   ofelia:
     image: mcuadros/ofelia:latest
 
@@ -42,6 +45,8 @@ services:
       - ofelia_worker
 
 
+    networks:
+      - cloud-bot
 
 volumes:
   mongodb_data:

@@ -1,14 +1,16 @@
-import requests
-from json.decoder import JSONDecodeError
-from prometheus_api_client import PrometheusConnect
 import traceback
+from json.decoder import JSONDecodeError
 
-from constants import traces_api_request
-from models import *
+import requests
 from mongoengine import connect
 from mongoengine.errors import NotUniqueError, ValidationError
-from constants import PROMETHEUS_ENDPOINT
+from prometheus_api_client import PrometheusConnect
 
+from constants import PROMETHEUS_ENDPOINT, MONGO_DB, MONGO_USERNAME, MONGO_HOST
+from constants import traces_api_request
+from models import *
+
+connect(db=MONGO_DB, username=MONGO_USERNAME, host=MONGO_HOST)
 prometheus_client = PrometheusConnect(url=PROMETHEUS_ENDPOINT, disable_ssl=True)
 
 # CPU Usage Query
@@ -28,7 +30,7 @@ def parse_prom_metrics(metric_dict, type='cpu'):
     print(f'{metric_name} -> {metric_value}')
 
     if type == 'cpu':
-        cpu_load = CPULoad(service_name=metric_name, timestamp=ts, cpu_load=metric_value)
+        cpu_load = CpuLoad(service_name=metric_name, timestamp=ts, cpu_load=metric_value)
         cpu_load.save()
 
     elif type == 'mem':
@@ -47,7 +49,6 @@ for metric_dict in cpu_metric_data:
 for metric_dict in mem_metric_data:
     parse_prom_metrics(metric_dict, type='mem')
 
-connect(db='cloudbot', username='cloudbot', host='mongodb')
 
 spans = []
 
