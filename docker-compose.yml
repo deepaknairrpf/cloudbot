@@ -1,0 +1,48 @@
+version: "3.8"
+
+networks:
+  cloud-bot:
+    driver: bridge
+    external:
+      name: cloud-bot
+
+
+services:
+
+  mongodb:
+    image: 'docker.io/bitnami/mongodb:4.2.10'
+    ports:
+      - "27017:27017"
+    volumes:
+      - 'mongodb_data:/bitnami/mongodb'
+
+    networks:
+      - cloud-bot
+
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+      - MONGO_INITDB_ROOT_USERNAME=cloudbot
+
+  ofelia_worker:
+    restart: always
+    image: cloudbot
+    container_name: ofelia_worker
+    command: [ "sleep", "infinity" ]
+
+  ofelia:
+    image: mcuadros/ofelia:latest
+
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./ofelia-crontab.ini:/etc/ofelia/config.ini
+      - ./ofelia-logs:/var/log/
+      - /etc/ssl/certs:/etc/ssl/certs
+
+    depends_on:
+      - ofelia_worker
+
+
+
+volumes:
+  mongodb_data:
+    driver: local

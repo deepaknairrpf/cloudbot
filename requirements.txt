@@ -1,1 +1,2 @@
 prometheus-api-client
+mongoengine==0.22.1

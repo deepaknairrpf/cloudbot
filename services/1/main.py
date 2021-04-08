@@ -52,7 +52,7 @@ def call_service3():
 def index():
     with zipkin_span(
         service_name=SERVICE_NAME,
-        span_name=f"index_{SERVICE_NAME}",
+        span_name=f"{SERVICE_NAME}",
         transport_handler=default_handler,
         port=FLASK_PORT,
         sample_rate=ZIPKIN_SAMPLE_RATE,
