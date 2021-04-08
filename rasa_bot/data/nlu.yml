@@ -91,9 +91,9 @@ nlu:
     - am I talking to a bot?
     - am I talking to a human?
 
-- intent:
+- intent: query_api_latency
   examples: |
     - which services are slow ?
-    - which service have degrading performance
+    - which [service](item) have degrading performance
     - show me the slow services
-    - services with high latencyquery_api_latency
+    - services with high latency
