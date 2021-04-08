@@ -1,12 +1,13 @@
-from mongoengine import Document, StringField, LongField, DictField, FloatField
+from mongoengine import Document, StringField, LongField, DictField, FloatField, BooleanField
+from mongoengine import StringField
 
-SUCCESS = 'success'
-FAILURE = 'failure'
+SUCCESS = 'SUCCESS'
+FAILURE = 'FAILURE'
 ROOT = 'root'
 
 STATUS_CHOICES = (
-    (SUCCESS, 'success'),
-    (FAILURE, 'failure')
+    (SUCCESS, 'SUCCESS'),
+    (FAILURE, 'FAILURE')
 )
 
 SERVER_KIND = 'SERVER'
@@ -26,11 +27,12 @@ class SpanLatency(Document):
     span_kind = StringField(max_length=20, choices=SPAN_KIND)
     start_timestamp = LongField()
     duration = LongField()
-    tags = DictField()
-    status = StringField(choices=STATUS_CHOICES)
+    metadata = DictField()
+    response_status = StringField(choices=STATUS_CHOICES)
     trace_id = StringField(max_length=32, min_length=16, required=True)
-    parent_id = StringField(max_length=16, min_length=16, default=ROOT)
+    parent_id = StringField(max_length=16, default=ROOT)
     span_id = StringField(max_length=16, min_length=16, required=True, unique_with=['trace_id', 'span_kind'])
+    developer_details = DictField()
 
 
 class CpuLoad(Document):

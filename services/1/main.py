@@ -7,6 +7,7 @@ from flask import Flask, request
 from py_zipkin.encoding import Encoding
 from py_zipkin.request_helpers import create_http_headers
 from py_zipkin.zipkin import zipkin_client_span, zipkin_span
+from urllib.parse import urlencode
 
 app = Flask(__name__)
 
@@ -39,13 +40,15 @@ def log_request_info():
 
 
 @zipkin_client_span(service_name=SERVICE_NAME, span_name=f"call_service2_from_{SERVICE_NAME}")
-def call_service2():
-    return requests.get(SERVICE2_URL, headers=create_http_headers())
+def call_service2(query_params):
+    query_str = urlencode(query_params)
+    return requests.get(f'{SERVICE2_URL}?{query_str}', headers=create_http_headers())
 
 
 @zipkin_client_span(service_name=SERVICE_NAME, span_name=f"call_service3_from_{SERVICE_NAME}")
-def call_service3():
-    return requests.get(SERVICE3_URL, headers=create_http_headers())
+def call_service3(query_params):
+    query_str = urlencode(query_params)
+    return requests.get(f'{SERVICE3_URL}?{query_str}', headers=create_http_headers())
 
 
 @app.route('/')
@@ -56,16 +59,33 @@ def index():
         transport_handler=default_handler,
         port=FLASK_PORT,
         sample_rate=ZIPKIN_SAMPLE_RATE,
-        encoding=Encoding.V2_JSON
+        encoding=Encoding.V2_JSON,
+        binary_annotations={'developer_info': {'name': 'Deepak', 'email': 'deepak.nair@dataweave.com', 'manager': 'Ram'}}  # TODO(Deepak): Fetch this from git
     ) as zipkin_context:
         zipkin_context.update_binary_annotations({"user_headers": request.headers})
 
+        # Query params to control failure rate and latency by  emulating a O(2^n) recursive implementation of
+        # factorial algorithm.
+
+        should_fail = request.args.get('fail')
+        factorial = request.args.get('factorial')
+
+        query_params = {
+            'should_fail': should_fail.lower() if should_fail else 'false',
+            'factorial':  factorial if factorial else "0"
+        }
+        # Simulating synchronous calls to different microservices
+        service2_response = call_service2(query_params)
+        service3_response = call_service3(query_params)
+
         return json.dumps({
-            "failure_chance_pct": INTENTIONAL_FAILURE_PCT,
+            "should_fail": should_fail,
+            "input": factorial,
             "response_codes": {
-                "service2": call_service2().status_code,
-                "service3": call_service3().status_code
-            }
+                "service2": service2_response.status_code,
+                "service3": service3_response.status_code
+            },
+            "service3_response": service3_response.json()
         }, indent=4), 200
 
 

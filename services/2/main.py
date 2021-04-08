@@ -7,6 +7,7 @@ from flask import Flask, request
 from py_zipkin.encoding import Encoding
 from py_zipkin.request_helpers import create_http_headers
 from py_zipkin.zipkin import ZipkinAttrs, zipkin_client_span, zipkin_span
+from urllib.parse import urlencode
 
 app = Flask(__name__)
 
@@ -39,12 +40,18 @@ def log_request_info():
 
 
 @zipkin_client_span(service_name=SERVICE_NAME, span_name=f"call_service3_from_{SERVICE_NAME}")
-def call_service3():
-    # Intentional chance to fail
-    if INTENTIONAL_FAILURE_PCT and random.randint(0, 100) <= INTENTIONAL_FAILURE_PCT:
-        raise Exception(f"Intentional {INTENTIONAL_FAILURE_PCT}% failure")
+def call_service3(query_params):
+    print(query_params)
+    should_fail_query_param = query_params.get('fail')
+    should_fail = True if should_fail_query_param == 'true' else False
 
-    return requests.get(SERVICE3_URL, headers=create_http_headers())
+    query_str = urlencode(query_params)
+
+    # Intentional chance to fail
+    if should_fail:
+        raise Exception(f"Intentional failure")
+
+    return requests.get(f'{SERVICE3_URL}?{query_str}', headers=create_http_headers())
 
 
 @app.route("/")
@@ -63,9 +70,18 @@ def index():
         transport_handler=default_handler,
         port=FLASK_PORT,
         sample_rate=ZIPKIN_SAMPLE_RATE,
-        encoding=Encoding.V2_JSON
+        encoding=Encoding.V2_JSON,
+        binary_annotations={'dev': 'Deepak'}
     ):
-        return str(call_service3().status_code), 200
+        should_fail = request.args.get('fail')
+        factorial = request.args.get('factorial')
+
+        query_params = {
+            'should_fail': should_fail.lower() if should_fail else 'false',
+            'factorial':  factorial if factorial else "0"
+        }
+
+        return call_service3(query_params).status_code, 200
 
 
 if __name__ == "__main__":

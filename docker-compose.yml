@@ -48,7 +48,7 @@ services:
       - cloud-bot
 
   rasa_bot:
-    build: .
+    image: cloudbot
     command: [ "python", "-m", "rasa_sdk", "--actions", "rasa_bot.actions" ]
     working_dir: "/app/"
     environment:
@@ -57,6 +57,9 @@ services:
     ports:
       - "5005:5005"
       - "5055:5055"
+
+    networks:
+      - cloud-bot
 
 volumes:
   mongodb_data:
