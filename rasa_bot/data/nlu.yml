@@ -90,3 +90,10 @@ nlu:
     - are you a human?
     - am I talking to a bot?
     - am I talking to a human?
+
+- intent:
+  examples: |
+    - which services are slow ?
+    - which service have degrading performance
+    - show me the slow services
+    - services with high latencyquery_api_latency
