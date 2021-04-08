@@ -97,3 +97,6 @@ nlu:
     - which [service](item) have degrading performance
     - show me the slow services
     - services with high latency
+    - get me the services which are slow
+    - which are my slowest services
+    - show highest latency services

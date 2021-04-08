@@ -31,7 +31,5 @@ stories:
 
 - story: query api latency
   steps:
-  - intent: greet
-  - action: utter_greet
   - intent: query_api_latency
   - action: action_service_latency
