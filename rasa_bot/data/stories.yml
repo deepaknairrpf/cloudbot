@@ -29,7 +29,32 @@ stories:
   - intent: deny
   - action: utter_goodbye
 
-- story: query api latency
+- story: query slow services
   steps:
-  - intent: query_api_latency
-  - action: action_service_latency
+  - intent: slow_service
+  - action: action_slow_service
+
+- story: query failing services
+  steps:
+  - intent: failing_service
+  - action: action_failing_service
+
+- story: query degrading services
+  steps:
+  - intent: performance_degrade
+  - action: action_degrading_service
+
+- story: query service load
+  steps:
+  - intent: service_load
+  - action: action_service_load
+
+- story: query maintainer
+  steps:
+  - intent: ask_maintainer
+  - action: action_ask_maintainer
+
+- story: query more info
+  steps:
+  - intent: more_info
+  - action: action_ask_moreinfo
