@@ -51,7 +51,7 @@ def index():
             flags=request.headers['X-B3-Flags'],
             is_sampled=request.headers["X-B3-Sampled"],
         ),
-        span_name=f"index_{SERVICE_NAME}",
+        span_name=f"{SERVICE_NAME}",
         transport_handler=default_handler,
         port=FLASK_PORT,
         sample_rate=ZIPKIN_SAMPLE_RATE,

@@ -44,6 +44,9 @@ services:
     volumes:
       - './services/2:/app'
 
+    ports:
+      - "5002:5000"
+
     networks:
       - cloud-bot
 
@@ -55,6 +58,10 @@ services:
       - docker-service.env
     environment:
       - SERVICE_NAME=service3
+
+    ports:
+      - "5003:5000"
+
     volumes:
       - './services/3:/app'
 

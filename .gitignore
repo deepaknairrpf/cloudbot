@@ -139,3 +139,4 @@ cython_debug/
 
 # Pycharm IDE
 *.idea/
+ofelia-logs/
