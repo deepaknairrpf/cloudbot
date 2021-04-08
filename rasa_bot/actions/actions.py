@@ -17,6 +17,8 @@ from mongoengine.errors import NotUniqueError, ValidationError
 
 from constants import MONGO_DB, MONGO_USERNAME, MONGO_HOST
 
+import time
+
 class ActionFindFailingServices(Action):
 
     def name(self) -> Text:
@@ -29,13 +31,14 @@ class ActionFindFailingServices(Action):
         # Connect To DB
         connect(db=MONGO_DB, username=MONGO_USERNAME, host=MONGO_HOST)       
         # Create Query
-        failedServices = SpanLatency.objects(response_status="failure")
+        failedServices = SpanLatency.objects(response_status="failure").order_by('-start_timestamp')
         # Return Response
-        responses = []
+        responses = [], traces = {}
         for data in failedServices:
-          responses.append(data.span_name)
-        list(dict.fromkeys(response))
+          responses.append([data.span_name])
+          traces[data.span_name] = '...url/' + data.trace_id 
 
+        list(dict.fromkeys(responses))
         response = 'Hey .....' # Build Apt Response
         dispatcher.utter_message(text=response)
 
@@ -58,7 +61,7 @@ class ActionServiceLatency(Action):
         responses = []
         for data in slowServices:
           responses.append(data.span_name)
-        list(dict.fromkeys(response))
+        list(dict.fromkeys(responses))
 
         response = 'Hey .....' # Build Apt Response
         dispatcher.utter_message(text=response)
@@ -78,9 +81,9 @@ class ActionsDegradingServices(Action):
         connect(db=MONGO_DB, username=MONGO_USERNAME, host=MONGO_HOST)       
         
         # Create Query
-        currentTimestamp 
-        previousHourTimestamp
-        previousDayTimestamp
+        currentTimestamp = round(time.time())
+        previousHourTimestamp = currentTimestamp - 3600*1000000
+        previousDayTimestamp = currentTimestamp - 3600*24*1000000
         seviceOneRecent = SpanLatency.objects(start_timestamp__gte=previousHourTimestamp, span_name="service1").average('duration')
         seviceOnePrevious = SpanLatency.objects(start_timestamp__lt=previousHourTimestamp, start_timestamp__gte=, span_name="service1").average('duration')
         didServiceOneDegrade = seviceOneRecent < seviceOnePrevious ? true : false 
