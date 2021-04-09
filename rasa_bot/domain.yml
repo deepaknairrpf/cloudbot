@@ -35,6 +35,9 @@ slots:
   service_name:
     type: text
     influence_conversation: false
+  context:
+    type: any
+    influence_conversation: false
 
 responses:
   utter_greet:
