@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 from mongoengine import connect
 from models import *
 from constants import MONGO_HOST, MONGO_DB, MONGO_USERNAME
-
+from collections import defaultdict
 
 
 
@@ -71,7 +71,7 @@ for service in distinct_services:
     most_recent_span = SpanLatency.objects(span_name=service, span_kind=SERVER_KIND).order_by('-start_timestamp').first()
     most_recent_span_id = most_recent_span.id
     most_recent_span_duration = most_recent_span.duration
-    avg_latency = SpanLatency.objects(span_name=service, id__ne=most_recent_span_id, span_kind=SERVER_KIND).average('duration')
+    avg_latency = SpanLatency.objects(span_name=service, span_id__ne=most_recent_span_id, span_kind=SERVER_KIND).average('duration')
 
     if most_recent_span_duration > avg_latency:
         print(f'''{service} is degrading in performance.\nDuration of latest request took {most_recent_span_duration} microseconds as opposed to an average latency of {avg_latency} microseconds''')
@@ -115,3 +115,31 @@ for k, v in metadata.items():
     print(f'{k}: {v}')
 
 print()
+
+# Dependent services due to service x
+x = 'service3'
+latest_service_span = SpanLatency.objects(span_name=x, span_kind=SERVER_KIND).order_by('-duration').first()
+trace_id_of_latest_service_span = latest_service_span.trace_id
+spans = SpanLatency.objects(trace_id=trace_id_of_latest_service_span, span_kind=SERVER_KIND)
+
+service_name_span_id_map = {}
+service_dependency_map = defaultdict(list)
+
+for span in spans:
+    service_name_span_id_map[span.span_id] = span
+
+for span in spans:
+    span_id = span.span_id
+    span_name = span.span_name
+    parent_id = span.parent_id
+
+    dependency_list = service_dependency_map[span_name]
+    parent_span_obj = service_name_span_id_map.get(parent_id)
+    if parent_span_obj:
+        dependency_list.append(parent_span_obj)
+
+
+print(f'Operations affected due to {x} for the slowest trace are:')
+affected_spans = service_dependency_map.get(x, [])
+for span in affected_spans:
+    print(f'{span.span_name}\t Latency: {span.duration // 1000} milliseconds')
