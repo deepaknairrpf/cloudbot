@@ -1,4 +1,5 @@
 import traceback
+import json
 from json.decoder import JSONDecodeError
 
 import requests
@@ -56,57 +57,59 @@ try:
     traces_response = requests.get(traces_api_request)
 
     for trace_list in traces_response.json():
-        for trace_info in trace_list:
-            span_name = trace_info['name']
-            span_id = trace_info['id']
-            parent_id = trace_info.get('parentId', ROOT)
-            trace_id = trace_info['traceId']
-            duration = trace_info['duration']
-            start_timestamp = trace_info['timestamp']
-            span_kind = trace_info['kind']
+        try:
+            for trace_info in trace_list:
+                span_name = trace_info['name']
+                span_id = trace_info['id']
+                parent_id = trace_info.get('parentId', ROOT)
+                trace_id = trace_info['traceId']
+                duration = trace_info['duration']
+                start_timestamp = trace_info['timestamp']
+                span_kind = trace_info['kind']
 
-            tags = trace_info.get('tags', {})
-            service_endpoint_metadata = trace_info.info('localEndpoint', {})
+                tags = trace_info.get('tags', {})
+                service_endpoint_metadata = trace_info.get('localEndpoint', {})
 
-            metadata = dict(tags, **service_endpoint_metadata)
+                metadata = dict(tags, **service_endpoint_metadata)
+                developer_details = metadata.get('developer_info', "")
+                developer_details = json.loads(developer_details.replace('\'', '\"')) if developer_details else {}
 
-            status = SUCCESS if "error" not in metadata else FAILURE
+                status = SUCCESS if "error" not in metadata else FAILURE
 
-            span_latency = SpanLatency(
-                span_name=span_name,
-                span_kind=span_kind,
-                start_timestamp=start_timestamp,
-                duration=duration,
-                metadata=metadata,
-                status=status,
-                trace_id=trace_id,
-                parent_id=parent_id,
-                span_id=span_id
-            )
-            span_latency.save()
+                span_latency = SpanLatency(
+                    span_name=span_name,
+                    span_kind=span_kind,
+                    start_timestamp=start_timestamp,
+                    duration=duration,
+                    metadata=metadata,
+                    response_status=status,
+                    trace_id=trace_id,
+                    parent_id=parent_id,
+                    span_id=span_id,
+                    developer_details=developer_details
+                )
+                span_latency.save()
 
-except JSONDecodeError as jde:
-    print(jde)
-    traceback.print_exc()
-    print(f'API did not return a valid JSON')
+        except JSONDecodeError as jde:
+            print(jde)
+            traceback.print_exc()
+            print(f'API did not return a valid JSON')
 
-except KeyError as ke:
-    print(ke)
-    traceback.print_exc()
-    print(f'API response did not have mandatory keys')
+        except KeyError as ke:
+            print(ke)
+            traceback.print_exc()
+            print(f'API response did not have mandatory keys')
 
-except NotUniqueError as nue:
-    print(f'Skipping record as it already exists')
-    print(nue)
+        except NotUniqueError as nue:
+            print(f'Skipping record as it already exists')
 
-except ValidationError as ve:
-    print(ve)
-    traceback.print_exc()
+        except ValidationError as ve:
+            print(ve)
+            traceback.print_exc()
 
-except Exception as e:
-    print(e)
+except Exception as exc:
+    print(exc)
     traceback.print_exc()
     print(f'Failed to parse API response')
-
 
 

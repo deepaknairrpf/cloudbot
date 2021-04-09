@@ -60,7 +60,7 @@ def index():
         port=FLASK_PORT,
         sample_rate=ZIPKIN_SAMPLE_RATE,
         encoding=Encoding.V2_JSON,
-        binary_annotations={'developer_info': {'name': 'Deepak', 'email': 'deepak.nair@dataweave.com', 'manager': 'Ram'}}  # TODO(Deepak): Fetch this from git
+        binary_annotations={"developer_info": {"name": "Deepak", "email": "deepak.nair@dataweave.com", "manager": "Ram"}}  # TODO(Deepak): Fetch this from git
     ) as zipkin_context:
         zipkin_context.update_binary_annotations({"user_headers": request.headers})
 
