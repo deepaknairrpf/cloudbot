@@ -16,8 +16,6 @@ services:
     networks:
       - cloud-bot
 
-
-
   service1:
     build:
       context: services/1

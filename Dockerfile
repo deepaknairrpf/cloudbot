@@ -13,7 +13,7 @@ COPY ./requirements.txt /app/requirements.txt
 WORKDIR /app
 
 ENV PYTHONPATH /app
-RUN echo $PYTHONPATH >/usr/local/lib/python3.6/site-packages/dataweave_path.pth
+RUN echo $PYTHONPATH >/usr/local/lib/python3.6/site-packages/cloudbot_path.pth
 
 RUN pip install -r requirements.txt
 COPY . .
