@@ -12,8 +12,8 @@ from typing import Any, Text, Dict, List
 from rasa_sdk import Action, Tracker
 from rasa_sdk.executor import CollectingDispatcher
 from rasa_sdk.events import AllSlotsReset
-from actions.utils import extract_int_from_string
-from actions.constants import DEFAULT_LATENCY_THRESHOLD
+from rasa_bot.actions.utils import extract_int_from_string
+from rasa_bot.actions.constants import DEFAULT_LATENCY_THRESHOLD
 
 
 class ActionSlowService(Action):
