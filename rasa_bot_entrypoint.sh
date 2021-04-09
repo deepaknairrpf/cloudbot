@@ -1,3 +1,3 @@
 #!/bin/bash
-rasa run --model rasa_bot/models/cloud_bot_model.tar.gz --endpoints rasa_bot/endpoints.yml &
+rasa run  --port 5005 --connector slack --credentials rasa_bot/credentials.yml --model rasa_bot/models/cloud_bot_model.tar.gz --endpoints rasa_bot/endpoints.yml --cors * --enable-api --debug &
 exec "$@"
