@@ -89,6 +89,7 @@ try:
                     span_id=span_id,
                     developer_details=developer_details,
                 )
+                print(f'Saving distributed trace stats for {span_latency.span_name} service.')
                 span_latency.save()
 
         except JSONDecodeError as jde:
