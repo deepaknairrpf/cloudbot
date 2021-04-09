@@ -6,6 +6,7 @@
 
 
 # This is a simple example for a custom action which utters "Hello World!"
+from collections import defaultdict
 from datetime import datetime, timedelta
 from typing import Any, Text, Dict, List
 
@@ -36,7 +37,7 @@ class ActionSlowService(Action):
         if not latency_threshold:
             latency_threshold = DEFAULT_LATENCY_THRESHOLD
 
-
+        context = []
         x = latency_threshold
         slow_services = SpanLatency.objects.aggregate([
             {"$match": {'span_kind': 'SERVER', 'response_status': 'SUCCESS'}},
@@ -52,12 +53,13 @@ class ActionSlowService(Action):
                 average_latency = result['average_latency']
                 average_latency = average_latency / 1000
                 response += f'{service} has an avg latency of {average_latency} milliseconds\n'
+                context.append(service)
         else:
             response = f'No services have average latency greater than {x} milliseconds'
 
         dispatcher.utter_message(text=response)
 
-        return [AllSlotsReset(), SlotSet('threshold', str(latency_threshold))]
+        return [AllSlotsReset(), SlotSet('threshold', str(latency_threshold)), SlotSet('context', context)]
 
 
 def convert_to_trace_links(trace_ids):
@@ -79,7 +81,6 @@ class ActionFailingService(Action):
     def run(self, dispatcher: CollectingDispatcher,
             tracker: Tracker,
             domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
-
         # Services that are failing.
         failing_services_qs = SpanLatency.objects(response_status=FAILURE, span_kind=SERVER_KIND).distinct('span_name')
         failing_services = [service_name for service_name in failing_services_qs]
@@ -130,7 +131,6 @@ class ActionDegradingService(Action):
                                                   span_kind=SERVER_KIND).average('duration')
 
                 if most_recent_span_duration > avg_latency:
-
                     response = f'''{service} is degrading in performance.\nDuration of latest request took {most_recent_span_duration} microseconds as opposed to an average latency of {avg_latency} microseconds\n'''
         else:
             response = 'No services are degrading in performance.'
@@ -172,7 +172,15 @@ class ActionAskMoreInfo(Action):
             domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
         service_name = tracker.get_slot("service_name")
 
-        response = f"asking more info about service : {service_name}"
+        # Other details of service x?
+        latest_service_span = SpanLatency.objects(span_name=service_name, span_kind=SERVER_KIND).order_by(
+            '-start_timestamp').first()
+        metadata = latest_service_span.metadata
+        response = f'Details of service - {service_name}.\n'
+        for k, v in metadata.items():
+            k = k.title()
+            response += f'{k}: {v}\n'
+
         dispatcher.utter_message(text=response)
         return [AllSlotsReset()]
 
@@ -186,6 +194,12 @@ class ActionServiceLoad(Action):
             tracker: Tracker,
             domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
         service_name = tracker.get_slot("service_name")
+
+        if not service_name and tracker.get_slot("refer"):
+            context = tracker.get_slot("context")
+            if context:
+                service_name = context[0]
+
         current_time = datetime.now()
         previous_hour = current_time - timedelta(hours=1)
         previous_hour_ts = previous_hour.timestamp()
@@ -195,11 +209,52 @@ class ActionServiceLoad(Action):
             'cpu_load')
 
         response = f'Avg CPU load for service - {service_name} is {round(avg_cpu_load, 2)}% and the hourly average is {round(hourly_avg_cpu_load, 2)}% \n'
+        dispatcher.utter_message(text=response)
 
-        avg_mem_usage = MemLoad.objects(service_name=service_name).average('mem_load_bytes')
+        avg_mem_usage = MemLoad.objects(service_name=service_name).average('mem_load_bytes') / (1024 * 1024)
         hourly_avg_mem_usage = MemLoad.objects(service_name=service_name, timestamp__gte=previous_hour_ts).average(
-            'mem_load_bytes')
+            'mem_load_bytes') / (1024 * 1024)
 
-        response += f'Avg memory consumption for service - {service_name} is {int(avg_mem_usage)} bytes and the hourly average is {int(hourly_avg_mem_usage)} bytes'
+        response = f'Avg memory consumption for service - {service_name} is {int(avg_mem_usage)} MB and the hourly average is {int(hourly_avg_mem_usage)} MB'
+        dispatcher.utter_message(text=response)
+        return [AllSlotsReset()]
+
+
+class ActionAffectedServices(Action):
+
+    def name(self) -> Text:
+        return "action_affected_services"
+
+    def run(self, dispatcher: CollectingDispatcher,
+            tracker: Tracker,
+            domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
+        service_name = tracker.get_slot("service_name")
+
+        latest_service_span = SpanLatency.objects(span_name=service_name, span_kind=SERVER_KIND).order_by(
+            '-duration').first()
+        trace_id_of_latest_service_span = latest_service_span.trace_id
+        spans = SpanLatency.objects(trace_id=trace_id_of_latest_service_span, span_kind=SERVER_KIND)
+
+        service_name_span_id_map = {}
+        service_dependency_map = defaultdict(list)
+
+        for span in spans:
+            service_name_span_id_map[span.span_id] = span
+
+        for span in spans:
+            span_id = span.span_id
+            span_name = span.span_name
+            parent_id = span.parent_id
+
+            dependency_list = service_dependency_map[span_name]
+            parent_span_obj = service_name_span_id_map.get(parent_id)
+            if parent_span_obj:
+                dependency_list.append(parent_span_obj)
+
+        response = f'Operations affected due to service - {service_name} for the slowest trace are:\n'
+        affected_spans = service_dependency_map.get(service_name, [])
+        for span in affected_spans:
+            response += f'{span.span_name}\t Latency: {span.duration // 1000} milliseconds'
+
         dispatcher.utter_message(text=response)
         return [AllSlotsReset()]

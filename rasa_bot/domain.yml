@@ -14,6 +14,7 @@ intents:
   - service_load
   - ask_maintainer
   - more_info
+  - affected_services
 
 
 entities:
@@ -70,3 +71,4 @@ actions:
   - action_service_load
   - action_ask_maintainer
   - action_ask_moreinfo
+  - action_affected_services

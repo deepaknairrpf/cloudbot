@@ -152,3 +152,11 @@ nlu:
     - more details about [service2](service_name)
     - more details about [service3](service_name)
 
+- intent: affected_services
+  examples: |
+    - which services are affected by [this](refer)
+    - how does [this](refer) affect other services
+    - which services are affeceted by [service2](service_name)
+    - which services are affeceted by [service1](service_name)
+    - which services are affeceted by [service3](service_name)
+    - which services are affected by [these](refer)

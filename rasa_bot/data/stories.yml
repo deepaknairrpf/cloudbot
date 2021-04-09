@@ -58,3 +58,8 @@ stories:
   steps:
   - intent: more_info
   - action: action_ask_moreinfo
+
+- story: query affecteed services
+  steps:
+  - intent: affected_services
+  - action: action_affected_services
