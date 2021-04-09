@@ -91,12 +91,64 @@ nlu:
     - am I talking to a bot?
     - am I talking to a human?
 
-- intent: query_api_latency
+- intent: slow_service
   examples: |
     - which services are slow ?
-    - which [service](item) have degrading performance
     - show me the slow services
     - services with high latency
     - get me the services which are slow
     - which are my slowest services
     - show highest latency services
+    - Give me services that took longer than [500ms](threshold) ?
+    - services taking longer than [600](threshold) milli seconds
+    - services taking longer than [350ms](threshold)
+    - services taking longer than [10](threshold) milli seconds
+    - services taking longer than [5](threshold) milli seconds
+    - services taking longer than [10milli](threshold) second
+
+- intent: failing_service
+  examples: |
+    - which services are failing ?
+    - show me the failing services
+    - services which are failing
+    - get me the services which are failing
+    - which are my failing services
+    - crashing services
+
+- intent: performance_degrade
+  examples: |
+    - which services are having performance degrade ?
+    - services degrading in perfromance
+    - low performing services
+    - get me the services which are degrading in performance
+    - which are my worst performing services
+    - show degrading services
+
+- intent: service_load
+  examples: |
+    - what is the load on [these](refer) services
+    - what is the cpu ussage for [service1](service_name)
+    - load on [this](refer) service
+    - memory usage on [service2](service_name)
+    - memory usage on [service3](service_name)
+    - get me the load on [service2](service_name)
+
+
+- intent: ask_maintainer
+  examples: |
+    - who is the maintainer for [these](refer) services
+    - whose ass should i kick for [this](refer)
+    - who maintains [this](refer) service
+    - who maintains [service1](service_name)
+    - who maintains [service2](service_name)
+    - who maintains [service3](service_name)
+
+
+- intent: more_info
+  examples: |
+    - any more info on [this](refer) service
+    - more details about [this](refer) service
+    - any more info on [service1](service_name)
+    - more details about [service2](service_name)
+    - more details about [service3](service_name)
+

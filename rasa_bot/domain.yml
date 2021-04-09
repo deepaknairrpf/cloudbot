@@ -8,7 +8,33 @@ intents:
   - mood_great
   - mood_unhappy
   - bot_challenge
-  - query_api_latency
+  - slow_service
+  - failing_service
+  - performance_degrade
+  - service_load
+  - ask_maintainer
+  - more_info
+
+
+entities:
+  - threshold
+  - number
+  - refer
+  - service_name
+
+slots:
+  threshold:
+    type: float
+    influence_conversation: false
+  number:
+    type: text
+    influence_conversation: false
+  refer:
+    type: text
+    influence_conversation: false
+  service_name:
+    type: text
+    influence_conversation: false
 
 responses:
   utter_greet:
@@ -35,4 +61,9 @@ session_config:
   carry_over_slots_to_new_session: true
 
 actions:
-  - action_service_latency
+  - action_slow_service
+  - action_failing_service
+  - action_degrading_service
+  - action_service_load
+  - action_ask_maintainer
+  - action_ask_moreinfo
