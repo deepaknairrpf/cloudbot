@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 from mongoengine import connect
 from models import *
 from constants import MONGO_HOST, MONGO_DB, MONGO_USERNAME
@@ -64,3 +65,44 @@ for result in traces_with_worst_latency:
 print()
 
 # Services which are degrading in performance
+
+distinct_services = SpanLatency.objects(span_kind=SERVER_KIND).distinct('span_name')
+for service in distinct_services:
+    most_recent_span = SpanLatency.objects(span_name=service, span_kind=SERVER_KIND).order_by('-start_timestamp').first()
+    most_recent_span_id = most_recent_span.id
+    most_recent_span_duration = most_recent_span.duration
+    avg_latency = SpanLatency.objects(span_name=service, id__ne=most_recent_span_id, span_kind=SERVER_KIND).average('duration')
+
+    if most_recent_span_duration > avg_latency:
+        print(f'''{service} is degrading in performance.\nDuration of latest request took {most_recent_span_duration} microseconds as opposed to an average latency of {avg_latency} microseconds''')
+
+print()
+
+# What is the load on service x ?
+x = 'service1'
+current_time = datetime.now()
+previous_hour = current_time - timedelta(hours=1)
+previous_hour_ts = previous_hour.timestamp()
+
+avg_cpu_load = CpuLoad.objects(service_name=x).average('cpu_load')
+hourly_avg_cpu_load = CpuLoad.objects(service_name=x, timestamp__gte=previous_hour_ts).average('cpu_load')
+
+print(f'Avg CPU load for service {x} is {round(avg_cpu_load, 2)}% and the  hourly average is {round(hourly_avg_cpu_load, 2)}%')
+
+avg_mem_usage = MemLoad.objects(service_name=x).average('mem_load_bytes')
+hourly_avg_mem_usage = MemLoad.objects(service_name=x, timestamp__gte=previous_hour_ts).average('mem_load_bytes')
+
+print(f'Avg memory consumption for service {x} is {int(avg_mem_usage)} bytes and the hourly average is {int(hourly_avg_mem_usage)} bytes')
+
+print()
+
+
+# Who is the developer of service x?
+x = 'service1'
+latest_service_span = SpanLatency.objects(span_name=x, span_kind=SERVER_KIND).order_by('-start_timestamp').first()
+developer_details = latest_service_span.developer_details
+print(f'Developer details for service {x}.')
+for k, v in developer_details.items():
+    print(f'{k}: {v}')
+
+print()
