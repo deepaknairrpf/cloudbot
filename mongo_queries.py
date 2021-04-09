@@ -39,7 +39,7 @@ slow_services = SpanLatency.objects.aggregate([
     {"$group": {"_id": "$span_name", "average_latency": {"$avg": "$duration"}}},
     {"$match": {'average_latency': {'$gt': x * 1000}}},  # Milliseconds to Zipkin's microsecond conversion
 ])
-print(f'Services having an average latency lesser than {x} milliseconds.')
+print(f'Services having an average latency greater than {x} milliseconds.')
 
 for result in slow_services:
     service = result['_id']
@@ -103,6 +103,15 @@ latest_service_span = SpanLatency.objects(span_name=x, span_kind=SERVER_KIND).or
 developer_details = latest_service_span.developer_details
 print(f'Developer details for service {x}.')
 for k, v in developer_details.items():
+    print(f'{k}: {v}')
+
+print()
+
+# Other details of service x?
+latest_service_span = SpanLatency.objects(span_name=x, span_kind=SERVER_KIND).order_by('-start_timestamp').first()
+metadata = latest_service_span.metadata
+print(f'Other details for service {x}.')
+for k, v in metadata.items():
     print(f'{k}: {v}')
 
 print()
