@@ -65,14 +65,14 @@ def index():
         zipkin_context.update_binary_annotations({"user_headers": request.headers})
 
         # Query params to control failure rate and latency by  emulating a O(2^n) recursive implementation of
-        # factorial algorithm.
+        # fibonacci algorithm.
 
         should_fail = request.args.get('fail')
-        factorial = request.args.get('factorial')
+        fibonacci = request.args.get('fibonacci')
 
         query_params = {
-            'should_fail': should_fail.lower() if should_fail else 'false',
-            'factorial':  factorial if factorial else "0"
+            'fail': should_fail.lower() if should_fail else 'false',
+            'fibonacci':  fibonacci if fibonacci else "0"
         }
         # Simulating synchronous calls to different microservices
         service2_response = call_service2(query_params)
@@ -80,7 +80,7 @@ def index():
 
         return json.dumps({
             "should_fail": should_fail,
-            "input": factorial,
+            "input": fibonacci,
             "response_codes": {
                 "service2": service2_response.status_code,
                 "service3": service3_response.status_code

@@ -27,7 +27,7 @@ services:
     restart: always
     image: cloudbot
     container_name: ofelia_worker
-    command: [ "sleep", "infinity" ]
+    command: [ "sleep", "infinity" ]  # A worker to execute CRONs where the entrypoint process sleeps indefinitely
 
     networks:
       - cloud-bot

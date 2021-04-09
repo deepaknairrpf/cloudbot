@@ -34,30 +34,33 @@ def log_request_info():
     app.logger.debug("Body: %s", request.get_data())
 
 
-@zipkin_client_span(service_name=SERVICE_NAME, span_name=f'compute_factorial_{SERVICE_NAME}')
-def compute_factorial(query_params):
+@zipkin_client_span(service_name=SERVICE_NAME, span_name=f'compute_fibonacci_{SERVICE_NAME}')
+def compute_fibonacci(query_params):
 
-    def factorial(input: int):
-        """An O(2^n) implementation of factorial function to simulate an API with bad latency and stack
+    def fibonacci(input: int):
+        """An O(2^n) implementation of fibonacci function to simulate an API with bad latency and stack
         memory consumption"""
 
         # Base Case
         if input == 0:
+            return 0
+
+        elif input == 1:
             return 1
 
-        return input * factorial(input - 1)
+        return fibonacci(input - 1) + fibonacci(input - 2)
 
-    factorial_query_param = query_params.get('factorial')
+    fibonacci_query_param = query_params.get('fibonacci')
     num = 0
     try:
-        num = int(factorial_query_param)
+        num = int(fibonacci_query_param)
 
     except ValueError as ve:
         print(ve)
         traceback.print_exc()
 
-    result = factorial(num)
-    return {'factorial_result': result, 'num': num}
+    result = fibonacci(num)
+    return {'fibonacci_result': result, 'num': num}
 
 
 @app.route("/")
@@ -78,13 +81,13 @@ def index():
         encoding=Encoding.V2_JSON,
         binary_annotations={'dev': 'Deepak'}
     ):
-        factorial = request.args.get('factorial')
+        fibonacci = request.args.get('fibonacci')
 
         query_params = {
-            'factorial': factorial if factorial else "0"
+            'fibonacci': fibonacci if fibonacci else "0"
         }
 
-        return compute_factorial(query_params), 200
+        return compute_fibonacci(query_params), 200
 
 
 if __name__ == "__main__":

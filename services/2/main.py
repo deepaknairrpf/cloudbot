@@ -1,7 +1,5 @@
 import os
-import random
 from distutils.util import strtobool
-
 import requests
 from flask import Flask, request
 from py_zipkin.encoding import Encoding
@@ -41,17 +39,16 @@ def log_request_info():
 
 @zipkin_client_span(service_name=SERVICE_NAME, span_name=f"call_service3_from_{SERVICE_NAME}")
 def call_service3(query_params):
-    print(query_params)
     should_fail_query_param = query_params.get('fail')
     should_fail = True if should_fail_query_param == 'true' else False
-
     query_str = urlencode(query_params)
 
     # Intentional chance to fail
     if should_fail:
         raise Exception(f"Intentional failure")
 
-    return requests.get(f'{SERVICE3_URL}?{query_str}', headers=create_http_headers())
+    service3_response = requests.get(f'{SERVICE3_URL}?{query_str}', headers=create_http_headers())
+    return service3_response.json()
 
 
 @app.route("/")
@@ -74,14 +71,14 @@ def index():
         binary_annotations={'dev': 'Deepak'}
     ):
         should_fail = request.args.get('fail')
-        factorial = request.args.get('factorial')
+        fibonacci = request.args.get('fibonacci')
 
         query_params = {
-            'should_fail': should_fail.lower() if should_fail else 'false',
-            'factorial':  factorial if factorial else "0"
+            'fail': should_fail.lower() if should_fail else 'false',
+            'fibonacci':  fibonacci if fibonacci else "0"
         }
 
-        return call_service3(query_params).status_code, 200
+        return call_service3(query_params), 200
 
 
 if __name__ == "__main__":
