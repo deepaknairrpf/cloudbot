@@ -73,6 +73,7 @@ try:
                 metadata = dict(tags, **service_endpoint_metadata)
                 developer_details = metadata.get('developer_info', "")
                 developer_details = json.loads(developer_details.replace('\'', '\"')) if developer_details else {}
+                metadata['developer_info'] = developer_details
 
                 status = SUCCESS if "error" not in metadata else FAILURE
 
@@ -86,7 +87,7 @@ try:
                     trace_id=trace_id,
                     parent_id=parent_id,
                     span_id=span_id,
-                    developer_details=developer_details
+                    developer_details=developer_details,
                 )
                 span_latency.save()
 
