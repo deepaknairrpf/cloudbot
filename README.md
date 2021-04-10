@@ -11,11 +11,12 @@ The bot currently supports integrations with Prometheus (popular open-source inf
   `docker-compose -f prometheus/prometheus-docker-compose.yml up`  
   
   * Access prometheus and grafana dashboard at `http://localhost:9090/` and `http://localhost:3000/` respectively  
-  
+  * [!Grafana Container Monitoring Dashboard](https://github.com/deepaknairrpf/cloudbot/blob/master/prometheus/screens/Grafana_Docker_Containers.png)
 * Spawn Zipkin and the three example microservices using docker-compose  
   `docker-compose -f zipkin-docker-compose.yml up`  
   
-  * Access Zipkin dashboard at `http://localhost:9411/`
+  * Access Zipkin dashboard at `http://localhost:9411/`  
+  * [!Zipkin Trace](https://github.com/deepaknairrpf/cloudbot/blob/master/docs/Trace.png)
  
 * Build the docker image pertaining to the chatbot
   `docker build -t cloudbot .`
@@ -26,7 +27,7 @@ The bot currently supports integrations with Prometheus (popular open-source inf
   
 ## Demo Request Flow for the simulated microservices APIs
 
-![Request Flow](https://github.com/sebastienvercammen/flask-zipkin-demo/blob/master/docs/Request%20Flow.png)
+![Request Flow](https://github.com/deepaknairrpf/cloudbot/blob/master/docs/Microservices%20API.png)
 
 ```
 User
