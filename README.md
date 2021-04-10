@@ -23,6 +23,7 @@ The bot currently supports integrations with Prometheus (popular open-source inf
 
 * Spawn services used by bot, viz. rasa servers and mongodb using docker-compose
   `docker-compose up`
+  * ![Chatbot Dialog Flow](https://github.com/deepaknairrpf/cloudbot/blob/master/docs/chatbot3.png)
   
   
 ## Demo Request Flow for the simulated microservices APIs
