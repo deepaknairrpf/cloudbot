@@ -1,4 +1,4 @@
-# Cloudbot demo with Zipkin and Prometheus integration
+# Cloudbot with Zipkin and Prometheus Integration
 
 This project is a prototype of a conversational chatbot that understands natural-language queries about cloud workloads and provides rich analytical insights.  
 The bot currently supports integrations with Prometheus (popular open-source infrastructure monitoring tool) and Zipkin (a popular open-source distributed tracing tool)  
